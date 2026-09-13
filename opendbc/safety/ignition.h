@@ -64,4 +64,10 @@ void ignition_can_hook(const CANPacket_t *msg) {
     }
     prev_counter_vw_meb = counter;
   }
+
+  // BYD Atto 3: DRIVE_STATE.GEAR is broadcast while powered.
+  if (msg_matches(msg, 0x242U, 0U, 8U)) {
+    ignition_can = (msg->data[5] & 0x07U) != 0U;
+    ignition_can_cnt = 0U;
+  }
 }

@@ -183,6 +183,7 @@ typedef struct {
   const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool ignore_quality_flag;    // true if quality flag check is skipped
+  const bool optional;               // message may be observed without becoming a liveness requirement
 } CanMsgCheck;
 
 typedef struct {

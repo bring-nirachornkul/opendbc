@@ -67,7 +67,7 @@ BO_ 482 STEERING_MODULE_ADAS: 8 ADAS_ECU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" EPS
 
 BO_ 496 WHEELSPEED_CLEAN: 8 ESP_ECU
- SG_ WHEELSPEED_CLEAN : 0|16@1+ (0.1,0) [0|6553.5] "kph" MCU
+ SG_ WHEELSPEED_CLEAN : 0|16@1+ (0.0713,0) [0|4672.6] "kph" MCU
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
@@ -97,8 +97,10 @@ BO_ 660 METER_CLUSTER: 8 BCM
 
 BO_ 790 LKAS_HUD_ADAS: 8 MPC_CAM
  SG_ AUTO_LIGHT : 1|2@0+ (1,0) [0|3] "" XXX
+ SG_ PT1 : 2|2@1+ (1,0) [0|3] "" MCU
  SG_ LEFT_LANE_STATE : 4|2@1+ (1,0) [0|3] "" MCU
  SG_ LKS_MODE : 6|2@1+ (1,0) [0|3] "" MCU
+ SG_ PT2 : 8|2@1+ (1,0) [0|3] "" MCU
  SG_ HANDS_ON_WHEEL_REQ : 10|1@1+ (1,0) [0|1] "" MCU
  SG_ TJA_ICA_STATE : 11|4@1+ (1,0) [0|15] "" MCU
  SG_ HMA_ON_OFF : 15|1@0+ (1,0) [0|1] "" MCU
@@ -106,10 +108,12 @@ BO_ 790 LKAS_HUD_ADAS: 8 MPC_CAM
  SG_ LKAS_REQ_PREPARE : 27|1@1+ (1,0) [0|1] "" MCU
  SG_ LKAS_ACTIVE : 28|1@1+ (1,0) [0|1] "" MCU
  SG_ SLA_STATE : 29|3@1+ (1,0) [0|7] "" MCU
+ SG_ PT3 : 32|2@1+ (1,0) [0|3] "" MCU
  SG_ RIGHT_LANE_STATE : 34|2@1+ (1,0) [0|3] "" MCU
  SG_ LKAS_STATE : 36|4@1+ (1,0) [0|15] "" MCU
  SG_ SPEED_LIMIT_VALUE : 40|8@1+ (5,-5) [-5|1270] "kph" MCU
  SG_ LDSW_TYPE : 49|2@0+ (1,0) [0|3] "" MCU
+ SG_ PT4 : 50|2@1+ (1,0) [0|3] "" MCU
  SG_ COUNTER : 52|4@1+ (1,0) [0|15] "" MCU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
@@ -125,7 +129,7 @@ BO_ 813 ACC_HUD_ADAS: 8 ADAS_ECU
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" MCU
 
 BO_ 814 ACC_CMD: 8 ADAS_ECU
- SG_ ACCEL_CMD : 0|8@1+ (1,-100) [-100|155] "" MCU
+ SG_ ACCEL_CMD : 0|8@1+ (0.05,-5) [-5|7.75] "m/s^2" MCU
  SG_ ACC_ON_1 : 9|1@0+ (1,0) [0|1] "" MCU
  SG_ SET_ME_25_1 : 10|6@1+ (1,0) [0|63] "" MCU
  SG_ ACC_ON_2 : 17|1@0+ (1,0) [0|1] "" MCU
@@ -175,7 +179,7 @@ CM_ BO_ 496 "Wheel speed (cleaned average). Validated: 0-127 km/h matching drivi
 CM_ BO_ 508 "Column steering torque from EPS.";
 CM_ BO_ 578 "Drivetrain state: gear, brake pressed, raw throttle.";
 CM_ BO_ 660 "Body/meter cluster: doors + seatbelt.";
-CM_ BO_ 790 "LKAS HUD ADAS message from camera. Blocked by panda on bus 2; panda re-injects.";
+CM_ BO_ 790 "LKAS HUD ADAS message from camera. Blocked by panda on bus 2; panda re-injects. PT1-PT4 name previously-unnamed bits so a decode/repack round-trips byte-exact: the modules validate this frame's full bit pattern and fail-safe (latched DTCs) if a regenerated frame flips any bit. On-car PT3 bit 32 is constant 1; an unnamed bit packs as 0.";
 CM_ BO_ 813 "ACC HUD ADAS message (cruise set speed, distance, ACC state).";
 CM_ BO_ 814 "ACC acceleration command from ADAS ECU. Blocked by panda on bus 2 when OP longitudinal active.";
 CM_ BO_ 834 "Gas/brake pedal percentages.";

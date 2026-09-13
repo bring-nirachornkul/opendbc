@@ -329,12 +329,14 @@ void safety_tick(void) {
     // 2s of lag is worse case, since the function is called at 1Hz
     uint32_t frequency = current_safety_config.rx_checks[i].msg[current_safety_config.rx_checks[i].status.index].frequency;
     uint32_t timestep = 1e6 / frequency;
-    bool lagging = elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6);
+    // optional messages (BYD 0x32E) may be absent without becoming a liveness requirement
+    bool optional = current_safety_config.rx_checks[i].msg[current_safety_config.rx_checks[i].status.index].optional;
+    bool lagging = !optional && (elapsed_time > SAFETY_MAX(timestep * MAX_MISSED_MSGS, 1e6));
     current_safety_config.rx_checks[i].status.lagging = lagging;
 
     // enforce minimum frequency for safety-relevant messages
     bool frequency_invalid = frequency < 10U;
-    if (lagging || frequency_invalid || !is_msg_valid(current_safety_config.rx_checks, i)) {
+    if (!optional && (lagging || frequency_invalid || !is_msg_valid(current_safety_config.rx_checks, i))) {
       rx_checks_invalid = true;
       controls_allowed = false;
     }
