@@ -34,6 +34,7 @@
 #define SAFETY_PSA 31U
 #define SAFETY_RIVIAN 33U
 #define SAFETY_VOLKSWAGEN_MEB 34U
+#define SAFETY_BYD 35U
 #define SAFETY_MG 38U
 
 #define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
@@ -181,6 +182,7 @@ typedef struct {
   const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool ignore_quality_flag;    // true if quality flag check is skipped
+  const bool optional;               // message may be observed without becoming a liveness requirement
 } CanMsgCheck;
 
 typedef struct {
@@ -363,3 +365,4 @@ extern const safety_hooks volkswagen_pq_hooks;
 extern const safety_hooks rivian_hooks;
 extern const safety_hooks psa_hooks;
 extern const safety_hooks mg_hooks;
+extern const safety_hooks byd_hooks;

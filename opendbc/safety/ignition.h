@@ -66,6 +66,12 @@ void ignition_can_hook(const CANPacket_t *msg) {
       }
       prev_counter_vw_meb = counter;
     }
+
+    // BYD Yuan Plus / Atto 3: DRIVE_STATE.GEAR is broadcast while powered.
+    if ((msg->addr == 0x242U) && (len == 8)) {
+      ignition_can = (msg->data[5] & 0x07U) != 0U;
+      ignition_can_cnt = 0U;
+    }
   }
 
   // TODO: this is too loose, Teslas have 0x222
