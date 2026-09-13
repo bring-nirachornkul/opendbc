@@ -81,8 +81,7 @@ static void psa_rx_hook(const CANPacket_t *msg) {
   }
 }
 
-static bool psa_tx_hook(const CANPacket_t *msg) {
-  bool tx = true;
+static bool psa_lka_tx_hook(const CANPacket_t *msg) {
   static const AngleSteeringLimits PSA_STEERING_LIMITS = {
     .max_angle = 3900,
     .angle_deg_to_can = 10,
@@ -96,18 +95,13 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
     },
   };
 
-  // Safety check for LKA
-  if (msg->addr == PSA_LANE_KEEP_ASSIST) {
-    // SET_ANGLE
-    int desired_angle = to_signed((msg->data[6] << 6) | ((msg->data[7] & 0xFCU) >> 2), 14);
-    // TORQUE_FACTOR
-    bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
+  // The TX list dispatches only PSA_LANE_KEEP_ASSIST on PSA_MAIN_BUS to this hook.
+  // SET_ANGLE
+  int desired_angle = to_signed((msg->data[6] << 6) | ((msg->data[7] & 0xFCU) >> 2), 14);
+  // TORQUE_FACTOR
+  bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
 
-    if (steer_angle_cmd_checks(desired_angle, lka_active, PSA_STEERING_LIMITS)) {
-      tx = false;
-    }
-  }
-  return tx;
+  return !steer_angle_cmd_checks(desired_angle, lka_active, PSA_STEERING_LIMITS);
 }
 
 static safety_config psa_init(uint16_t param) {
@@ -131,7 +125,7 @@ static safety_config psa_init(uint16_t param) {
 const safety_hooks psa_hooks = {
   .init = psa_init,
   .rx = psa_rx_hook,
-  .tx = psa_tx_hook,
+  .tx = psa_lka_tx_hook,
   .get_counter = psa_get_counter,
   .get_checksum = psa_get_checksum,
   .compute_checksum = psa_compute_checksum,

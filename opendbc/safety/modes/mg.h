@@ -67,7 +67,7 @@ static void mg_rx_hook(const CANPacket_t *msg) {
   }
 }
 
-static bool mg_tx_hook(const CANPacket_t *msg) {
+static bool mg_steering_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits MG_STEERING_LIMITS = {
     .max_torque = 300,
     .max_rate_up = 6,
@@ -78,22 +78,10 @@ static bool mg_tx_hook(const CANPacket_t *msg) {
     .type = TorqueDriverLimited,
   };
 
-  bool tx = true;
-  bool violation = false;
-
-  // Steering control
-  if (msg->addr == 0x1fdU) {
-    int desired_torque = (((msg->data[0] & 0x7U) << 8) | msg->data[1]) - 1024U;
-    bool steer_req = GET_BIT(msg, 35U);
-
-    violation |= steer_torque_cmd_checks(desired_torque, steer_req, MG_STEERING_LIMITS);
-  }
-
-  if (violation) {
-    tx = false;
-  }
-
-  return tx;
+  // The TX list dispatches only steering control (0x1fd, bus 0) to this hook.
+  int desired_torque = (((msg->data[0] & 0x7U) << 8) | msg->data[1]) - 1024U;
+  bool steer_req = GET_BIT(msg, 35U);
+  return !steer_torque_cmd_checks(desired_torque, steer_req, MG_STEERING_LIMITS);
 }
 
 static safety_config mg_init(uint16_t param) {
@@ -120,7 +108,7 @@ static safety_config mg_init(uint16_t param) {
 const safety_hooks mg_hooks = {
   .init = mg_init,
   .rx = mg_rx_hook,
-  .tx = mg_tx_hook,
+  .tx = mg_steering_tx_hook,
   .get_checksum = mg_get_checksum,
   .compute_checksum = mg_compute_checksum,
   .get_counter = mg_get_counter,
