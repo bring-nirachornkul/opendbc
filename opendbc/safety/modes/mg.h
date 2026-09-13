@@ -67,7 +67,7 @@ static void mg_rx_hook(const CANPacket_t *msg) {
   }
 }
 
-static bool mg_steering_tx_hook(const CANPacket_t *msg) {
+static bool mg_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits MG_STEERING_LIMITS = {
     .max_torque = 300,
     .max_rate_up = 6,
@@ -108,7 +108,7 @@ static safety_config mg_init(uint16_t param) {
 const safety_hooks mg_hooks = {
   .init = mg_init,
   .rx = mg_rx_hook,
-  .tx = mg_steering_tx_hook,
+  .tx = mg_tx_hook,
   .get_checksum = mg_get_checksum,
   .compute_checksum = mg_compute_checksum,
   .get_counter = mg_get_counter,

@@ -83,13 +83,14 @@ class TestSafetyFramework(unittest.TestCase):
     self.assertFalse(self.safety.get_controls_allowed())
     self.assertFalse(self.safety.safety_tx_hook(common.make_msg(0, 0x123)))
 
-  def test_checksum_callbacks_required(self):
+  def test_rx_callbacks_required(self):
+    # The fixture has no counter callback, so counters must be explicitly ignored.
     msg = common.make_msg(0, 0x123)
-    for getter, computer, ignore in itertools.product((False, True), repeat=3):
-      with self.subTest(getter=getter, computer=computer, ignore=ignore):
+    for getter, computer, ignore_checksum, ignore_counter in itertools.product((False, True), repeat=4):
+      with self.subTest(getter=getter, computer=computer, ignore_checksum=ignore_checksum, ignore_counter=ignore_counter):
         self.safety.set_controls_allowed(True)
-        valid = ignore or (getter and computer)
-        self.assertEqual(self.safety.rx_check_checksum_callbacks(msg, getter, computer, ignore), valid)
+        valid = (ignore_checksum or (getter and computer)) and ignore_counter
+        self.assertEqual(self.safety.rx_check_callbacks(msg, getter, computer, ignore_checksum, ignore_counter), valid)
         self.assertEqual(self.safety.get_controls_allowed(), valid)
 
   def test_watchdog_faults(self):

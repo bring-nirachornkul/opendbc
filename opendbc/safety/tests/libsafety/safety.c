@@ -41,9 +41,9 @@ static uint32_t zero_checksum(const CANPacket_t *msg) {
   return 0U;
 }
 
-bool rx_check_checksum_callbacks(const CANPacket_t *msg, bool has_get_checksum, bool has_compute_checksum, bool ignore_checksum) {
+bool rx_check_callbacks(const CANPacket_t *msg, bool has_get_checksum, bool has_compute_checksum, bool ignore_checksum, bool ignore_counter) {
   RxCheck rx_checks[] = {
-    {.msg = {{0x123, 0, 8, 50U, .ignore_checksum = ignore_checksum, .ignore_counter = true, .ignore_quality_flag = true}, {0}, {0}}},
+    {.msg = {{0x123, 0, 8, 50U, .ignore_checksum = ignore_checksum, .ignore_counter = ignore_counter, .ignore_quality_flag = true}, {0}, {0}}},
   };
   const safety_config cfg = {.rx_checks = rx_checks, .rx_checks_len = 1};
   const safety_hooks hooks = {.get_checksum = has_get_checksum ? zero_checksum : NULL,

@@ -81,7 +81,7 @@ static void psa_rx_hook(const CANPacket_t *msg) {
   }
 }
 
-static bool psa_lka_tx_hook(const CANPacket_t *msg) {
+static bool psa_tx_hook(const CANPacket_t *msg) {
   static const AngleSteeringLimits PSA_STEERING_LIMITS = {
     .max_angle = 3900,
     .angle_deg_to_can = 10,
@@ -125,7 +125,7 @@ static safety_config psa_init(uint16_t param) {
 const safety_hooks psa_hooks = {
   .init = psa_init,
   .rx = psa_rx_hook,
-  .tx = psa_lka_tx_hook,
+  .tx = psa_tx_hook,
   .get_counter = psa_get_counter,
   .get_checksum = psa_get_checksum,
   .compute_checksum = psa_compute_checksum,
