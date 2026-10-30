@@ -27,6 +27,7 @@ class CarState(CarStateBase, CarStateExt):
     self.hands_on_level = 0
     self.prev_acc_state = 0
     self.das_control = None
+    self.seatbelt_unlatched = True
 
   def update_summon_state(self, summon_state: str, cruise_enabled: bool):
     summon_now = summon_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
@@ -134,7 +135,10 @@ class CarState(CarStateBase, CarStateExt):
         cp_vehicle = can_parsers[Bus.adas]
         ret.leftBlinker = cp_vehicle.vl["VCFRONT_lighting"]["VCFRONT_indicatorLeftRequest"] != 0
         ret.rightBlinker = cp_vehicle.vl["VCFRONT_lighting"]["VCFRONT_indicatorRightRequest"] != 0
-        ret.seatbeltUnlatched = cp_vehicle.vl["SeatBeltStatus"]["driverBuckleStatus"] != 1
+        # VCFRONT_vehicleStatus is multiplexed, the restraint signals are on page 0
+        if cp_vehicle.vl["VCFRONT_vehicleStatus"]["VCFRONT_vehicleStatusIndex"] == 0:
+          self.seatbelt_unlatched = cp_vehicle.vl["VCFRONT_vehicleStatus"]["VCFRONT_driverBuckleStatus"] != 1
+        ret.seatbeltUnlatched = self.seatbelt_unlatched
     else:
       # Doors
       ret.doorOpen = cp_party.vl["UI_warning"]["anyDoorOpen"] == 1
