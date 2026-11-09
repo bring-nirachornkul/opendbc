@@ -47,6 +47,11 @@ class CarControllerParams:
   # steeringPressed uses this signal. DRIVER_TORQUE has a median of 1.3 Nm while openpilot
   # steers, so 18 Nm is clear of hands-on noise and still detects a sustained fight.
   STEER_DRIVER_TORQUE_OVERRIDE_NM = 18
+  # Sign of 0x1FC DRIVER_TORQUE vs openpilot convention (left = positive). Used for
+  # CarState.steeringTorque, which openpilot reads only for nudge direction in
+  # desire_helper. Parked check: turn the wheel left by hand; if DRIVER_TORQUE goes
+  # negative, set this to -1.
+  DRIVER_TORQUE_SIGN = 1
 
   # Longitudinal comfort envelope. It stays inside the safety limit, because modes/byd.h
   # enforces -3.5 to +2.0 on 0x32E. The 0x32E ACCEL_CMD field resolves to 0.05 m/s^2 per LSB

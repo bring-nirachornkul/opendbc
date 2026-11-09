@@ -61,13 +61,15 @@ class CarState(CarStateBase):
 
     # steering wheel
     ret.steeringAngleDeg = cp.vl["STEER_MODULE_2"]["STEER_ANGLE_2"]
-    ret.steeringTorque = cp.vl["STEERING_TORQUE"]["MAIN_TORQUE"]        # EPS motor effort, not the driver
     ret.steeringTorqueEps = cp.vl["STEER_MODULE_2"]["DRIVER_EPS_TORQUE"]  # masked in EPS state 10, logs only
     # Driver override reads 0x1FC STEERING_TORQUE.DRIVER_TORQUE, at 0.1 Nm/bit. The car masks
     # DRIVER_EPS_TORQUE while the EPS is in state 10, which is the window openpilot steers, so
     # that signal cannot carry override. steerOverride is ET.OVERRIDE_LATERAL: openpilot gives
     # lateral control to the driver and continues when the driver relaxes. It does not disengage.
     driver_torque = cp.vl["STEERING_TORQUE"]["DRIVER_TORQUE"]
+    # Driver hand torque, not EPS motor effort (MAIN_TORQUE). openpilot uses the sign of
+    # steeringTorque for nudge direction, so it must come from the driver.
+    ret.steeringTorque = CCP.DRIVER_TORQUE_SIGN * driver_torque
     ret.steeringPressed = self.update_steering_pressed(abs(driver_torque) > CCP.STEER_DRIVER_TORQUE_OVERRIDE_NM, 5)
     # Do not set steeringDisengage on this car. It is a NO_ENTRY "Steering Pressed" plus an
     # immediate USER_DISABLE. steeringPressed above gives the soft lateral-override alert,
