@@ -128,12 +128,14 @@ class CarState(CarStateBase, CarStateExt):
       ret.leftBlindspot = cp_ap_party.vl["DAS_statusGen2"]["DAS_blindSpotRearLeft"] != 0
       ret.rightBlindspot = cp_ap_party.vl["DAS_statusGen2"]["DAS_blindSpotRearRight"] != 0
 
-      # Blinkers and seatbelt, only available with the VEHICLE bus tapped
+      # Blinkers, only available with the VEHICLE bus tapped
       if self.CP.flags & TeslaFlags.HW4_GEN2_VEHICLE_BUS:
         cp_vehicle = can_parsers[Bus.adas]
         ret.leftBlinker = cp_vehicle.vl["VCFRONT_lighting"]["VCFRONT_indicatorLeftRequest"] != 0
         ret.rightBlinker = cp_vehicle.vl["VCFRONT_lighting"]["VCFRONT_indicatorRightRequest"] != 0
-        ret.seatbeltUnlatched = cp_vehicle.vl["SeatBeltStatus"]["driverBuckleStatus"] != 1
+
+      # Seatbelt is not read on HW4 gen2: SeatBeltStatus (0x40A) is the left front seat, which is the
+      # passenger on right-hand drive cars. ret.seatbeltUnlatched stays False, same as without the VEHICLE bus.
     else:
       # Doors
       ret.doorOpen = cp_party.vl["UI_warning"]["anyDoorOpen"] == 1
