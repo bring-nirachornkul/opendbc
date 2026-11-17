@@ -58,14 +58,15 @@ class TestTeslaFingerprint(unittest.TestCase):
         assert m is not None, f"Unparsable FW: {fw}"
         assert PLATFORM_TO_CAR[m['platform']] == car_model, f"Platform letter {m['platform']!r} != {car_model.value}: {fw}"
 
-  def test_radar_detection(self):
-    # Test radar availability detection for cars with radar DBC defined
-    for radar in (True, False):
-      fingerprint = gen_empty_fingerprint()
-      if radar:
-        fingerprint[1][RADAR_START_ADDR] = 8
-      CP = CarInterface.get_params(CAR.TESLA_MODEL_3, fingerprint, [], False, False, False)
-      assert CP.radarUnavailable != radar
+  def test_radar_never_used(self):
+    # This branch never uses the radar, even when its start address shows up on bus 1
+    for car in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
+      for radar in (True, False):
+        fingerprint = gen_empty_fingerprint()
+        if radar:
+          fingerprint[1][RADAR_START_ADDR] = 8
+        CP = CarInterface.get_params(car, fingerprint, [], False, False, False)
+        assert CP.radarUnavailable
 
   def test_hw4_gen2_detection(self):
     # HW4 gen2 (2026+ Model Y) moved DAS_status to 0x399

@@ -160,9 +160,12 @@ class CarState(CarStateBase, CarStateExt):
     # Stock Autosteer should be disengaged (includes FSD)
     # TODO: find for TESLA_MODEL_X and HW2.5 vehicles
     if not (self.CP.flags & TeslaFlags.MISSING_DAS_SETTINGS):
-      # HW4 gen2 sends DAS_settings on the party bus instead of the autopilot party bus
-      cp_das_settings = cp_party if self.CP.flags & TeslaFlags.HW4_GEN2 else cp_ap_party
-      ret.invalidLkasSetting = cp_das_settings.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
+      if self.CP.flags & TeslaFlags.HW4_GEN2:
+        # HW4 gen2 has no DAS_status (0x39b), and sends DAS_settings on the party bus instead of the autopilot party bus
+        ret.invalidLkasSetting = cp_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
+      else:
+        # HW3/HW4: Autosteer may stay enabled in the car's menu, it only has to be disengaged
+        ret.invalidLkasSetting = cp_ap_party.vl["DAS_status"]["DAS_autopilotState"] not in (0, 1, 2)  # DISABLED, UNAVAILABLE, AVAILABLE
 
       # Because we don't have FSD 14 detection outside of a set of FW, we should check if this FW is accidentally missing from FSD_14_FW
       # 1. If in Autosteer or FSD, already caught by invalidLkasSetting
